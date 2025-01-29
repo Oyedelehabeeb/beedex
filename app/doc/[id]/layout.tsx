@@ -1,5 +1,6 @@
+import RoomsProvider from "@/components/RoomsProvider";
 import { auth } from "@clerk/nextjs/server";
-import { RoomProvider } from "@liveblocks/react";
+// import { RoomProvider } from "@liveblocks/react";
 
 export default async function DocLayout({
   children,
@@ -12,5 +13,5 @@ export default async function DocLayout({
   if (!session || !session.sessionClaims?.email) {
     throw new Error("Unauthorized");
   }
-  return <RoomProvider id={id}>{children}</RoomProvider>;
+  return <RoomsProvider roomId={id}>{children}</RoomsProvider>;
 }

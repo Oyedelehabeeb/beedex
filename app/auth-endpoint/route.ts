@@ -1,41 +1,91 @@
-import { NextRequest } from "next/server";
+// import { NextRequest, NextResponse } from "next/server";
+// import { auth } from "@clerk/nextjs/server";
+// import liveblocks from "@/lib/liveblocks";
+// import { adminDb } from "@/firebase-admin";
+
+// export async function POS(req: NextRequest) {
+//   const session = await auth();
+//   if (!session || !session.sessionClaims?.email) {
+//     throw new Error("Unauthorized");
+//   }
+
+//   //Get access to room;
+//   const { room } = await req.json();
+
+//   const { sessionClaims } = await auth();
+
+//   const sessions = liveblocks.prepareSession(
+//     // Ensure email exists and is a string
+//     sessionClaims?.email || "",
+//     {
+//       userInfo: {
+//         name: session?.sessionClaims?.fullName || "",
+//         email: session?.sessionClaims?.email || "",
+//         avatar: session?.sessionClaims?.image || "",
+//       },
+//     }
+//   );
+
+//   const usersInRoom = await adminDb
+//     .collectionGroup("rooms")
+//     .where("userId", "==", sessionClaims?.email)
+//     .get();
+
+//   const userInRoom = usersInRoom.docs.find((doc) => doc.id === room);
+//   if (userInRoom?.exists) {
+//     session.allow(room, session.FULL_ACCESS);
+//     const { body, status } = await session.authorize();
+
+//     return new Response(body, { status });
+//   } else {
+//     return NextResponse.json(
+//       { message: "You are not in this room." },
+//       { status: 403 }
+//     );
+//   }
+// }
+
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import liveblocks from "@/lib/liveblocks";
 import { adminDb } from "@/firebase-admin";
 
-export async function POS(req: NextRequest) {
-  const session = await auth();
-  if (!session || !session.sessionClaims?.email) {
-    throw new Error("Unauthorized");
+export async function POST(req: NextRequest) {
+  const { userId, sessionClaims } = await auth();
+  if (!userId || !sessionClaims?.email) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  //Get access to room;
+  // Get access to room
   const { room } = await req.json();
 
-  const { sessionClaims } = await auth();
+  // Create Liveblocks session
+  const session = liveblocks.prepareSession(sessionClaims?.email, {
+    userInfo: {
+      name: sessionClaims?.fullName || "",
+      email: sessionClaims?.email || "",
+      avatar: sessionClaims?.image || "",
+    },
+  });
 
-  const sessions = liveblocks.prepareSession(
-    // Ensure email exists and is a string
-    sessionClaims?.email || "",
-    {
-      userInfo: {
-        name: session?.sessionClaims?.fullName || "",
-        email: session?.sessionClaims?.email || "",
-        avatar: session?.sessionClaims?.image || "",
-      },
-    }
-  );
-
+  // Check if user has access to the room
   const usersInRoom = await adminDb
     .collectionGroup("rooms")
-    .where("userId", "==", sessionClaims?.email)
+    .where("userId", "==", sessionClaims.email)
     .get();
 
   const userInRoom = usersInRoom.docs.find((doc) => doc.id === room);
+
   if (userInRoom?.exists) {
+    // Use the Liveblocks session methods
     session.allow(room, session.FULL_ACCESS);
     const { body, status } = await session.authorize();
-
+    console.log("You are in the room");
     return new Response(body, { status });
+  } else {
+    return NextResponse.json(
+      { message: "You are not in this room." },
+      { status: 403 }
+    );
   }
 }

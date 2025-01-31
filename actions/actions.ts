@@ -90,3 +90,23 @@ export async function inviteUserToDocument(roomId: string, email: string) {
     return { success: false };
   }
 }
+
+export async function removeUserFromDocument(roomId: string, email: string) {
+  const session = await auth();
+  if (!session || !session.sessionClaims?.email) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    await adminDb
+      .collection("users")
+      .doc(email)
+      .collection("rooms")
+      .doc(roomId)
+      .delete();
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { success: false };
+  }
+}

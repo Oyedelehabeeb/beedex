@@ -11,6 +11,7 @@ import useOwner from "@/lib/useOwner";
 import DeleteDocument from "./DeleteDocument";
 import InviteUser from "./InviteUser";
 import ManageUsers from "./ManageUsers";
+import Avatars from "./Avatars";
 
 export default function Document({ id }: { id: string }) {
   const [input, setInput] = useState("");
@@ -43,17 +44,12 @@ export default function Document({ id }: { id: string }) {
             {isUpdating ? "Updating" : "Update"}
           </Button>
 
-          {/* IF */}
-
           {isOwner && (
             <>
-              {/* Invite User */}
-              {/* Delete Document */}
               <InviteUser />
               <DeleteDocument />
             </>
           )}
-          {/* isOwner && InviteUser, DeleteDocument */}
         </form>
       </div>
       <div className="flex max-w-6xl mx-auto justify-between items-center mb-5">
@@ -61,6 +57,7 @@ export default function Document({ id }: { id: string }) {
         <ManageUsers />
 
         {/* Avatars */}
+        <Avatars />
       </div>
       <hr className="pb-10" />
 

@@ -9,53 +9,62 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { FormEvent, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Button } from "./ui/button";
 import { usePathname, useRouter } from "next/navigation";
 import { deleteDocument, inviteUserToDocument } from "@/actions/actions";
-import { toast } from "sonner";
 import { Input } from "./ui/input";
+import { useUser } from "@clerk/nextjs";
+import useOwner from "@/lib/useOwner";
+import { useRoom } from "@liveblocks/react/suspense";
+import { useCollection } from "react-firebase-hooks/firestore";
+import { collectionGroup, query, where } from "firebase/firestore";
+import { db } from "@/firebase";
 
 function ManageUser() {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const pathname = usePathname();
-  const router = useRouter();
+  const { user } = useUser();
+  const isOwner = useOwner();
+  const room = useRoom();
 
-  async function handleInvite(e: FormEvent) {
-    e.preventDefault();
-    const roomId = pathname.split("/").pop();
+  const [usersInRoom] = useCollection(
+    user && query(collectionGroup(db, "rooms"), where("roomId", "==", room.id))
+  );
 
-    if (!roomId) return;
-
-    startTransition(async () => {
-      const { success } = await inviteUserToDocument(roomId, email);
-
-      if (success) {
-        setIsOpen(false);
-        setEmail("");
-        toast.success("User added to room successfully!");
-      } else {
-        toast.error("Failed to add user to  room!");
-      }
-    });
-  }
+  async function handleDelete(userId: string) {}
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <Button asChild variant="outline">
-        <DialogTrigger>Users</DialogTrigger>
+        <DialogTrigger>Users ({usersInRoom?.docs.length})</DialogTrigger>
       </Button>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Users with access</DialogTitle>
           <DialogDescription>
-           Below is a list of users who have access to this document
+            Below is a list of users who have access to this document
           </DialogDescription>
         </DialogHeader>
-<hr className="my-2" />
+        <hr className="my-2" />
 
-<div></div>
+        <div>
+          {usersInRoom?.docs.map((doc) => (
+            <div
+              key={doc.data().userId}
+              className="flex items-center justify-between"
+            >
+              <p className="font-light">
+                {doc.data().userId === user?.emailAddresses[0].toString()
+                  ? `You ({${doc.data().userId}})`
+                  : doc.data().userId}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button variant="outline">{doc.data().role}</Button>
+              </div>
+            </div>
+          ))}
+        </div>
       </DialogContent>
     </Dialog>
   );

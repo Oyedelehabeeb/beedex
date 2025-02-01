@@ -61,7 +61,7 @@ function InviteUser() {
             onChange={(e) => setEmail(e.target.value)}
           />
           <Button type="submit" disabled={isPending || !email}>
-            {isPending ? "Inviting" : "Invite"}
+            {isPending ? "Inviting..." : "Invite"}
           </Button>
         </form>
       </DialogContent>

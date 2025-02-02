@@ -8,6 +8,7 @@ import { MoonIcon, SunIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import BlockNote from "./BlockNote";
 import TranslateDocument from "./TranslateDocument";
+import ChartToDocument from "./ChartToDocument";
 
 export default function Editor() {
   const room = useRoom(); //This hook gives access to the current room;
@@ -39,9 +40,8 @@ export default function Editor() {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex items-center gap-2 justify-end mb-10">
-        {/* TranslateDocument AI */}
         <TranslateDocument doc={doc} />
-        {/* ChartDocument AI */}
+        <ChartToDocument doc={doc} />
 
         {/* dARKmODE */}
         <Button className={style} onClick={() => setDarkMode(!darkMode)}>

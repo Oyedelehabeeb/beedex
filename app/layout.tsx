@@ -8,7 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 export const metadata: Metadata = {
   title: "Beedex",
   description:
-    "A secure and open-source platform for managing and collaborating on beekeeping projects.",
+    "A secure, private and open-source platform for managing and collaborating on beekeeping projects.",
 };
 
 export default function RootLayout({

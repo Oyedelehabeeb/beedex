@@ -3,15 +3,15 @@
 import { adminDb } from "@/firebase-admin";
 import liveblocks from "@/lib/liveblocks";
 import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+// import { redirect } from "next/navigation";
 // import { query } from "firebase/firestore";
 // import { useRouter } from "next/navigation";
 
 export async function createNewDocument() {
   const session = await auth();
-  const userId = session.userId;
-  if (!userId) {
-    redirect(`/sign-in`);
+  // const userId = session.userId;
+  if (!session || !session.sessionClaims?.email) {
+    throw new Error("Unauthorized");
   }
 
   const userEmail = session.sessionClaims?.email;
